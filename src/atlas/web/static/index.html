@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ATLAS console</title>
+<!-- anti-flash: set theme before paint -->
+<script>
+  (function(){
+    var t = localStorage.getItem("atlas-theme") || "light";
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <span class="mark" aria-hidden="true">&#9670;</span>
+    <span class="name">ATLAS</span>
+    <span class="sub">attack-surface console</span>
+  </div>
+  <div class="bar-right">
+    <span style="font:8pt 'Segoe UI',Tahoma,sans-serif;color:#505050" data-hide-dark>Project:</span>
+    <span id="project-chip" class="chip" title="active project">default</span>
+    <span style="font:8pt 'Segoe UI',Tahoma,sans-serif;color:#505050;margin-left:4px" data-hide-dark>DB:</span>
+    <span id="db-chip" class="chip quiet" title="database backend">sqlite</span>
+    <span id="version-chip" class="chip quiet" style="margin-left:4px">v0.0.0</span>
+    <button id="theme-toggle" title="Toggle dark / light mode">Dark</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab" data-view="overview" role="tab">Overview</button>
+  <button class="tab" data-view="scope"    role="tab">Scope</button>
+  <button class="tab" data-view="collect"  role="tab">Collect</button>
+  <button class="tab" data-view="assets"   role="tab">Assets</button>
+  <button class="tab" data-view="dns"      role="tab">DNS</button>
+  <button class="tab" data-view="certs"    role="tab">Certificates</button>
+  <button class="tab" data-view="http"     role="tab">HTTP</button>
+  <button class="tab" data-view="jobs"     role="tab">Jobs</button>
+  <button class="tab" data-view="audit"    role="tab">Audit</button>
+</nav>
+
+<main id="main">
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-overview">
+    <div id="setup-banner" class="banner hidden">
+      <strong>No scope declared yet.</strong>
+      Collection is refused until an authorized target is added.
+      <button class="link" data-goto="scope">Declare scope &rarr;</button>
+    </div>
+
+    <div class="grid cards" id="stat-cards"></div>
+
+    <div class="grid two">
+      <section class="panel">
+        <h2>Collectors</h2>
+        <div id="collector-list" class="collector-list"></div>
+      </section>
+      <section class="panel">
+        <h2>Runtime</h2>
+        <dl id="runtime-list" class="kv"></dl>
+      </section>
+    </div>
+
+    <section class="panel">
+      <h2>Projects</h2>
+      <p class="hint">One console instance serves one project. Start another on a second port to serve a different one.</p>
+      <div id="project-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Recent Jobs</h2>
+      <div id="overview-jobs"></div>
+    </section>
+
+    <section class="panel" id="panel-redflags">
+      <h2>Red Flags</h2>
+      <p class="hint">Derived from collected data — no live probing. Run a collection pass first.</p>
+      <div id="redflags-body"><p class="empty">loading…</p></div>
+    </section>
+
+    <section class="panel" id="panel-ai">
+      <h2>AI Chat</h2>
+      <p class="hint">Chat with an AI that has full context of your collected data. Key stored in browser only.</p>
+      <div class="row-form tight" style="margin-bottom:6px">
+        <label for="ai-key">API key:</label>
+        <input id="ai-key" type="password" placeholder="sk-…" spellcheck="false" style="flex:1 1 180px;min-width:120px" />
+        <label for="ai-endpoint" style="margin-left:6px">Endpoint:</label>
+        <input id="ai-endpoint" placeholder="https://api.openai.com/v1/chat/completions" spellcheck="false" style="flex:2 1 260px;min-width:160px" />
+        <label for="ai-model-input" style="margin-left:6px">Model:</label>
+        <input id="ai-model-input" placeholder="gpt-4o-mini" spellcheck="false" style="width:140px;flex:none" />
+        <button id="ai-save-key" class="ghost">Save</button>
+        <button id="ai-clear-chat" class="ghost">Clear</button>
+      </div>
+      <div id="ai-chat-log" style="
+        background:var(--field-bg);
+        border:1px solid;
+        border-color:var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+        padding:6px 8px;
+        min-height:120px;
+        max-height:400px;
+        overflow-y:auto;
+        font:9pt/1.5 'Segoe UI',Tahoma,sans-serif;
+        margin-bottom:4px;
+      "></div>
+      <div style="display:flex;gap:4px">
+        <input id="ai-input" placeholder="Ask anything about the collected data…" spellcheck="false" style="flex:1" />
+        <button id="ai-send" class="primary" style="min-width:60px">Send</button>
+      </div>
+      <div id="ai-status" class="status hidden"></div>
+    </section>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-scope">
+    <section class="panel">
+      <h2>Declare Authorization</h2>
+      <p class="hint">
+        Nothing is collected unless a value matches an include rule below. This is the
+        same gate the CLI uses — there is no override in this console.
+      </p>
+      <form id="scope-form" autocomplete="off" style="display:grid;grid-template-columns:1fr max-content max-content max-content;gap:4px;align-items:center;margin-bottom:6px">
+        <input id="scope-pattern" name="pattern"
+               placeholder="example.com · www.example.com · 203.0.113.0/24 · 198.51.100.7"
+               spellcheck="false" required />
+        <select id="scope-kind" name="kind" title="inferred when left on auto" style="width:90px">
+          <option value="">auto</option>
+          <option value="domain">domain</option>
+          <option value="ip">ip</option>
+          <option value="cidr">cidr</option>
+          <option value="url">url</option>
+        </select>
+        <input id="scope-note" name="note" placeholder="note (optional)" style="width:140px;flex:none" />
+        <button type="submit" class="primary" style="width:80px">Add rule</button>
+      </form>
+      <div id="scope-check" class="check-strip hidden"></div>
+      <div id="scope-table"></div>
+    </section>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-collect">
+    <section class="panel">
+      <h2>Run a Collection Pass</h2>
+      <form id="collect-form" autocomplete="off" style="display:grid;grid-template-columns:1fr max-content max-content max-content;gap:4px;align-items:center;margin-bottom:6px">
+        <input id="collect-target" name="target" placeholder="example.com" spellcheck="false" required />
+        <select id="collect-type" name="job_type" style="width:110px"></select>
+        <input id="collect-scan" name="scan_id" placeholder="urlscan id (urlscan only)" spellcheck="false" style="width:200px;flex:none" />
+        <button type="submit" class="primary" id="collect-submit" style="width:80px">Collect</button>
+      </form>
+      <p class="hint" id="collect-hint">Runs in this process and can take a while: DNS, then TLS handshakes, then HTTP.</p>
+      <div id="collect-status" class="status hidden"></div>
+      <div id="collect-result"></div>
+    </section>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-assets">
+    <section class="panel">
+      <h2>Assets</h2>
+      <div class="row-form tight">
+        <label for="asset-kind">Kind:</label>
+        <select id="asset-kind" style="width:110px">
+          <option value="">all kinds</option>
+          <option value="domain">domain</option>
+          <option value="ip">ip</option>
+          <option value="asn">asn</option>
+          <option value="certificate">certificate</option>
+          <option value="service">service</option>
+        </select>
+        <label for="asset-search" style="margin-left:6px">Search:</label>
+        <input id="asset-search" placeholder="search by key" spellcheck="false" />
+        <button id="asset-refresh" class="ghost">Refresh</button>
+      </div>
+      <div id="assets-table"></div>
+    </section>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-dns">
+    <section class="panel">
+      <h2>DNS Records</h2>
+      <div class="row-form tight">
+        <label for="dns-picker">Name:</label>
+        <select id="dns-picker" style="width:220px"><option value="">collected names&hellip;</option></select>
+        <input id="dns-input" placeholder="example.com" spellcheck="false" />
+        <button id="dns-load" class="primary">Load</button>
+      </div>
+      <div id="dns-body"></div>
+    </section>
+    <section class="panel">
+      <h2>Dangling CNAME Indicators</h2>
+      <p class="hint">Reported only when a stored NXDOMAIN answer covers the CNAME target.</p>
+      <div id="dangling-table"></div>
+    </section>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-certs">
+    <section class="panel">
+      <h2>Certificates</h2>
+      <div class="row-form tight">
+        <label for="cert-window">Window:</label>
+        <select id="cert-window" style="width:150px">
+          <option value="">all</option>
+          <option value="7">expiring &le; 7 days</option>
+          <option value="30" selected>expiring &le; 30 days</option>
+          <option value="90">expiring &le; 90 days</option>
+        </select>
+        <button id="cert-refresh" class="ghost">Refresh</button>
+      </div>
+      <div id="certs-table"></div>
+    </section>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-http">
+    <section class="panel">
+      <h2>HTTP Observations</h2>
+      <div id="http-list"></div>
+    </section>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-jobs">
+    <section class="panel">
+      <h2>Jobs</h2>
+      <div style="margin-bottom:6px">
+        <button id="jobs-refresh" class="ghost">Refresh</button>
+      </div>
+      <div id="jobs-table"></div>
+    </section>
+  </section>
+
+  <!-- ------------------------------------------------------------------ -->
+  <section class="view" id="view-audit">
+    <section class="panel">
+      <h2>Audit Log</h2>
+      <p class="hint">Every scope change, collection attempt and denial is recorded here.</p>
+      <div style="margin-bottom:6px">
+        <button id="audit-refresh" class="ghost">Refresh</button>
+      </div>
+      <div id="audit-table"></div>
+    </section>
+    <section class="panel">
+      <h2>Export</h2>
+      <p class="hint">One JSON document: scope, assets, certificates, HTTP observations, jobs.</p>
+      <button id="export-btn" class="ghost">Download project JSON</button>
+    </section>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span>Loopback only &middot; no authentication &middot; collections are rate-limited and scope-gated</span>
+  <span id="foot-status"></span>
+</footer>
+
+<div id="toast" class="toast hidden" role="status"></div>
+
+<script src="/static/app.js"></script>
+<script>
+  (function () {
+    var btn = document.getElementById("theme-toggle");
+    function apply(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("atlas-theme", theme);
+      btn.textContent = theme === "dark" ? "Light" : "Dark";
+    }
+    apply(localStorage.getItem("atlas-theme") || "light");
+    btn.addEventListener("click", function () {
+      var current = document.documentElement.getAttribute("data-theme");
+      apply(current === "dark" ? "light" : "dark");
+    });
+  })();
+</script>
+</body>
+</html>

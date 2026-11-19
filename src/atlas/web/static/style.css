@@ -1,0 +1,460 @@
+/* style.css — late-2000s Windows utility skin */
+
+/* all tokens live here — theme blocks only override what changes */
+:root {
+  --bg:         #F0F0F0;
+  --field-bg:   #FFFFFF;
+  --hover-row:  #E8F0FB;
+  --text:       #000000;
+  --grey:       #505050;
+  --error:      #A00000;
+  --navy:       #00007F;
+  --sel:        #316AC5;
+  --line:       #919191;
+  --mono:       Consolas, "Courier New", monospace;
+
+  --field-bc-t: #919191;
+  --field-bc-r: #DFDFDF;
+  --field-bc-b: #DFDFDF;
+  --field-bc-l: #919191;
+  --btn-bc-t:   #DFDFDF;
+  --btn-bc-r:   #919191;
+  --btn-bc-b:   #919191;
+  --btn-bc-l:   #DFDFDF;
+  --tag-ok-fg:  #005000;
+  --tag-ok-bc:  #005000;
+  --tag-wrn-fg: #806000;
+  --tag-wrn-bc: #806000;
+}
+
+[data-theme="dark"] {
+  --bg:         #2b2b2b;
+  --field-bg:   #3c3c3c;
+  --hover-row:  #4a4a4a;
+  --text:       #e8e8e8;
+  --grey:       #a0a0a0;
+  --line:       #666666;
+  --field-bc-t: #555555;
+  --field-bc-r: #888888;
+  --field-bc-b: #888888;
+  --field-bc-l: #555555;
+  --btn-bc-t:   #888888;
+  --btn-bc-r:   #555555;
+  --btn-bc-b:   #555555;
+  --btn-bc-l:   #888888;
+  --tag-ok-fg:  #66bb66;
+  --tag-ok-bc:  #66bb66;
+  --tag-wrn-fg: #ccaa44;
+  --tag-wrn-bc: #ccaa44;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 9pt/1.4 "Segoe UI", Tahoma, sans-serif;
+}
+
+.hidden { display: none !important; }
+
+/* ------------------------------------------------------------------ */
+/* toolbar / header                                                     */
+/* ------------------------------------------------------------------ */
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 8px 3px 6px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand { display: flex; align-items: baseline; gap: 8px; }
+.mark  { color: var(--text); font-size: 9pt; }
+.name  { font: bold 9pt/1 "Segoe UI", Tahoma, sans-serif; }
+.sub   { color: var(--grey); font: 8pt/1 "Segoe UI", Tahoma, sans-serif; }
+
+.bar-right { display: flex; gap: 4px; align-items: center; }
+
+.chip {
+  font: 8pt/1 Consolas, "Courier New", monospace;
+  padding: 1px 6px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+.chip.quiet { color: var(--grey); }
+
+#theme-toggle {
+  font: 8pt/1.3 "Segoe UI", Tahoma, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 1px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 0;
+}
+#theme-toggle:hover { background: var(--field-bg); }
+
+/* ------------------------------------------------------------------ */
+/* tabs                                                                 */
+/* ------------------------------------------------------------------ */
+
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 4px 6px 0;
+  background: var(--bg);
+  border-bottom: 2px solid var(--line);
+  overflow-x: auto;
+  position: sticky;
+  top: 30px;
+  z-index: 9;
+}
+
+.tab {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-bottom: none;
+  color: var(--text);
+  padding: 3px 12px 4px;
+  font: 9pt/1.3 "Segoe UI", Tahoma, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-right: 2px;
+  position: relative;
+  bottom: -2px;
+  min-width: 0;
+  border-radius: 0;
+}
+.tab:hover { background: var(--field-bg); }
+.tab.active {
+  background: var(--field-bg);
+  border-bottom: 2px solid var(--field-bg);
+  font-weight: bold;
+  z-index: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* layout                                                               */
+/* ------------------------------------------------------------------ */
+
+main { padding: 6px; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.panel {
+  background: var(--bg);
+  border: 2px groove var(--line);
+  padding: 8px 10px 10px;
+  margin-bottom: 6px;
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+  font: bold 9pt/1.3 "Segoe UI", Tahoma, sans-serif;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.grid { display: grid; gap: 6px; }
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid.two .panel { margin-bottom: 0; }
+.cards { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); margin-bottom: 6px; }
+
+.card {
+  background: var(--field-bg);
+  border: 1px solid;
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+  padding: 6px 8px;
+}
+.card .label {
+  color: var(--grey);
+  font: 8pt/1.3 "Segoe UI", Tahoma, sans-serif;
+}
+.card .value {
+  font: 18pt/1.4 Consolas, "Courier New", monospace;
+  margin-top: 2px;
+  color: var(--text);
+}
+.card .value.small { font-size: 11pt; word-break: break-all; }
+
+/* ------------------------------------------------------------------ */
+/* forms                                                                */
+/* ------------------------------------------------------------------ */
+
+.row-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.row-form.tight { margin-bottom: 6px; }
+
+label {
+  font: 9pt/1.4 "Segoe UI", Tahoma, sans-serif;
+  color: var(--text);
+}
+
+input, select {
+  font: 9pt/1.3 Consolas, "Courier New", monospace;
+  color: var(--text);
+  background: var(--field-bg);
+  border: 1px solid;
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+  border-radius: 0;
+  padding: 2px 4px;
+}
+input { flex: 1 1 200px; min-width: 120px; }
+input::placeholder { color: var(--grey); font-style: normal; }
+input:focus, select:focus {
+  outline: 1px dotted var(--text);
+  outline-offset: -2px;
+}
+
+select {
+  font: 9pt/1.3 "Segoe UI", Tahoma, sans-serif;
+  padding: 2px 2px;
+}
+
+button {
+  font: 9pt/1.3 "Segoe UI", Tahoma, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid;
+  border-color: var(--btn-bc-t) var(--btn-bc-r) var(--btn-bc-b) var(--btn-bc-l);
+  border-radius: 0;
+  padding: 2px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 70px;
+}
+button:hover:not(:disabled) { background: var(--field-bg); }
+button:active:not(:disabled) {
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+  padding: 3px 9px 1px 11px;
+}
+button:disabled { color: var(--grey); cursor: default; }
+
+button.primary { font-weight: bold; }
+button.ghost   { background: var(--bg); }
+
+button.link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--navy);
+  text-decoration: underline;
+  min-width: 0;
+  font: 9pt/1.4 "Segoe UI", Tahoma, sans-serif;
+}
+
+button.danger { color: var(--error); }
+
+/* ------------------------------------------------------------------ */
+/* table                                                                */
+/* ------------------------------------------------------------------ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 8pt/1.4 "Segoe UI", Tahoma, sans-serif;
+}
+
+th {
+  text-align: left;
+  font: bold 8pt/1.4 "Segoe UI", Tahoma, sans-serif;
+  color: var(--text);
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 2px 6px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+td {
+  padding: 1px 6px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  line-height: 18px;
+}
+
+tbody tr:hover td { background: var(--hover-row); }
+td.mono, th.mono { font-family: Consolas, "Courier New", monospace; }
+td.num  { font-family: Consolas, "Courier New", monospace; text-align: right; white-space: nowrap; }
+td.wrap { word-break: break-all; }
+td.nowrap { white-space: nowrap; }
+
+.empty {
+  color: var(--grey);
+  font-style: italic;
+  padding: 6px 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* badges / tags                                                        */
+/* ------------------------------------------------------------------ */
+
+.tag {
+  display: inline-block;
+  font: 8pt/1.3 "Segoe UI", Tahoma, sans-serif;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  white-space: nowrap;
+  color: var(--text);
+}
+.tag.ok   { color: var(--tag-ok-fg);  border-color: var(--tag-ok-bc); }
+.tag.bad  { color: var(--error);      border-color: var(--error); }
+.tag.warn { color: var(--tag-wrn-fg); border-color: var(--tag-wrn-bc); }
+.tag.off  { color: var(--grey);       border-color: var(--grey); }
+
+/* ------------------------------------------------------------------ */
+/* misc                                                                 */
+/* ------------------------------------------------------------------ */
+
+.hint {
+  color: var(--grey);
+  font: 8pt/1.4 "Segoe UI", Tahoma, sans-serif;
+  margin: 0 0 6px;
+}
+
+.banner {
+  border: 1px solid;
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+  background: var(--field-bg);
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  font: 9pt/1.4 "Segoe UI", Tahoma, sans-serif;
+}
+
+.status {
+  border: 1px solid;
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+  background: var(--field-bg);
+  padding: 4px 8px;
+  margin-bottom: 6px;
+  font: 8pt/1.4 Consolas, "Courier New", monospace;
+}
+.status.running { color: var(--text); }
+.status.ok      { color: var(--tag-ok-fg); }
+.status.bad     { color: var(--error); }
+
+.check-strip {
+  font: 8pt/1.4 Consolas, "Courier New", monospace;
+  padding: 3px 8px;
+  margin-bottom: 6px;
+  background: var(--field-bg);
+  border: 1px solid;
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+}
+.check-strip.ok  { color: var(--tag-ok-fg); }
+.check-strip.bad { color: var(--error); }
+
+.collector-list { display: grid; gap: 3px; }
+.collector {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  padding: 2px 6px;
+  border-bottom: 1px solid var(--line);
+  background: var(--field-bg);
+}
+.collector .why { color: var(--grey); font-size: 8pt; }
+
+.kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+  margin: 0;
+}
+.kv dt { color: var(--grey); font: 8pt/1.4 "Segoe UI", Tahoma, sans-serif; }
+.kv dd { margin: 0; font: 8pt/1.4 Consolas, "Courier New", monospace; word-break: break-all; }
+
+details summary {
+  cursor: pointer;
+  color: var(--grey);
+  font: 8pt/1.4 "Segoe UI", Tahoma, sans-serif;
+}
+details[open] summary { color: var(--text); }
+
+pre {
+  background: var(--field-bg);
+  border: 1px solid;
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+  padding: 6px 8px;
+  overflow-x: auto;
+  font: 8pt/1.4 Consolas, "Courier New", monospace;
+  margin: 4px 0 0;
+  max-height: 320px;
+}
+
+.subpanel { margin-top: 10px; }
+.subpanel h3 {
+  font: bold 8pt/1.4 "Segoe UI", Tahoma, sans-serif;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+  margin: 0 0 4px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* status bar / footer                                                  */
+/* ------------------------------------------------------------------ */
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  color: var(--text);
+  font: 8pt/1.4 "Segoe UI", Tahoma, sans-serif;
+  padding: 2px 6px 4px;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+
+#foot-status {
+  border: 1px solid;
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+  padding: 1px 6px;
+  min-width: 200px;
+  color: var(--grey);
+}
+
+/* ------------------------------------------------------------------ */
+/* toast                                                                */
+/* ------------------------------------------------------------------ */
+
+.toast {
+  position: fixed;
+  right: 12px;
+  bottom: 28px;
+  max-width: 420px;
+  background: var(--field-bg);
+  border: 1px solid;
+  border-color: var(--field-bc-t) var(--field-bc-r) var(--field-bc-b) var(--field-bc-l);
+  border-left: 3px solid var(--error);
+  padding: 6px 10px;
+  font: 8pt/1.4 "Segoe UI", Tahoma, sans-serif;
+  z-index: 50;
+  color: var(--text);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+.toast.ok { border-left-color: var(--tag-ok-fg); }

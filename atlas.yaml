@@ -1,0 +1,54 @@
+# ATLAS configuration
+# Environment variables (ATLAS_*) override anything set here.
+# Copy this file to your project directory and edit as needed.
+environment: development
+instance_name: atlas
+
+database:
+  url: "sqlite+pysqlite:///./atlas.db"
+  echo: false
+  pool_size: 10
+  max_overflow: 20
+
+security:
+  # Scope enforcement is mandatory. Collection against an unauthorized target
+  # is refused before a socket is opened.
+  require_scope: true
+  # Private / loopback / link-local address space is refused by default (SSRF guard).
+  allow_private_addresses: false
+  dns_rebinding_protection: true
+  max_resolved_addresses: 16
+
+collector:
+  user_agent: "ATLAS/0.1 (+authorized-security-assessment)"
+  connect_timeout: 5
+  read_timeout: 10
+  total_timeout: 30
+  requests_per_second: 5
+  per_host_concurrency: 2
+  global_concurrency: 10
+  max_body_bytes: 2097152
+  max_redirects: 5
+  max_retries: 2
+  job_deadline_seconds: 900
+
+api:
+  host: 127.0.0.1
+  port: 8000
+  docs_enabled: true
+
+graph:
+  backend: networkx
+
+reports:
+  output_dir: "./reports"
+  pdf_enabled: false
+
+retention:
+  default_days: 180
+  keep_snapshots: 52
+
+sources:
+  # Free API key from https://urlscan.io/user/profile/ — 25 requests/day on free tier.
+  # Leave blank to skip urlscan.io collection.
+  urlscan_api_key: ""
